@@ -1,9 +1,10 @@
 from aiogram import Router, types, F
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
 
 from . import keyboards
 from . import text
+from bl_models.themes_bl import ThemaBL
 
 router = Router()
 
@@ -18,8 +19,20 @@ async def message_handler(msg: Message):
     await msg.answer(f"Вы вышли в меню!")
 
 @router.callback_query(F.data == "get_themes")
-async def get_themes(msg: Message):
-    await msg.answer(f"Здесь будут выводиться все темы и еще кое-что!")
+async def get_themes(callback: CallbackQuery):
+    await callback.message.answer(text.get_themes_message, reply_markup=keyboards.themes)
+
+
+@router.callback_query(F.data.startswith("theme_info_"))
+async def show_theme_info(callback: CallbackQuery):
+    theme_id = callback.data.split("_")[2]
+    theme_info = ThemaBL.get_theme_info(theme_id)
+
+    message = f"Направление: {theme_info[1]}\n\n"
+    message += f"{theme_info[2]}\n"
+
+    await callback.message.answer(message)
+
 
 @router.callback_query(F.data == "teacher_communication")
 async def get_themes(msg: Message):
