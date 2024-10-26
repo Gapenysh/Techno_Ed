@@ -1,1 +1,6 @@
+#telegram
 BOT_TOKEN = '7539534142:AAEw_w_34u6YX1dEWQXfQEevb917o_Cd6fQ'
+
+#sber_gigachat
+client_id = 'ed98251d-a7e8-4e7b-8c4b-99fde38816d4'
+auth_key = 'ZWQ5ODI1MWQtYTdlOC00ZTdiLThjNGItOTlmZGUzODgxNmQ0OjFiYjU2MWIxLTcxM2YtNDlhMC04OTM2LTZkN2Q3YTFiOThkOA=='
