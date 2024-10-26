@@ -5,10 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9319c669-8e93-4dcd-be49-6ad2f30d17a0" name="Changes" comment="update">
-      <change afterPath="$PROJECT_DIR$/dal_models/themes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dal_models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/dal_models/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db_connection.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_connection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bl_models/themes_bl.py" beforeDir="false" afterPath="$PROJECT_DIR$/bl_models/themes_bl.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dal_models/themes_dal.py" beforeDir="false" afterPath="$PROJECT_DIR$/dal_models/themes_dal.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/telegram_bot/handlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/telegram_bot/handlers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/telegram_bot/keyboards.py" beforeDir="false" afterPath="$PROJECT_DIR$/telegram_bot/keyboards.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/telegram_bot/text.py" beforeDir="false" afterPath="$PROJECT_DIR$/telegram_bot/text.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -140,7 +142,15 @@
       <option name="project" value="LOCAL" />
       <updated>1729960123605</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="update">
+      <option name="closed" value="true" />
+      <created>1729961766996</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1729961766996</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
