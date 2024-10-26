@@ -5,6 +5,7 @@ from aiogram.filters import Command
 from . import keyboards
 from . import text
 from bl_models.themes_bl import ThemaBL
+from bl_models.user_bl import UserBL
 
 router = Router()
 
@@ -27,11 +28,35 @@ async def get_themes(callback: CallbackQuery):
 async def show_theme_info(callback: CallbackQuery):
     theme_id = callback.data.split("_")[2]
     theme_info = ThemaBL.get_theme_info(theme_id)
+    telegram_id = callback.from_user.id
+    user_info = UserBL.get_user_info(telegram_id)
+    level_id = user_info[3]
+
+    courses = ThemaBL.get_courses_by_theme_and_level(theme_id, level_id)
+
+
+    message = f"Направление: {theme_info[1]}\n\n"
+    message += f"{theme_info[2]}\n"
+    message += f"{courses}"
+
+    await callback.message.answer(message)
+
+@router.callback_query(F.data.startswith("pick_theme"))
+async def pick_theme(callback: CallbackQuery):
+    # ----
+    telegram_id = callback.from_user.id
+    user_info = UserBL.get_user_info(telegram_id)
+    level_id = user_info[3]
+    user_theme_id = user_info[2]
+
+    courses = ThemaBL.get_courses_by_theme_and_level(user_theme_id, level_id)
 
     message = f"Направление: {theme_info[1]}\n\n"
     message += f"{theme_info[2]}\n"
 
     await callback.message.answer(message)
+
+
 
 
 @router.callback_query(F.data == "teacher_communication")
