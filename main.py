@@ -1,19 +1,25 @@
 import asyncio
 import logging
+
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters.command import Command
+from aiogram.enums import ParseMode
+from aiogram.fsm.storage.memory import MemoryStorage
 
-logging.basicConfig(level=logging.INFO)
-bot = Bot(token="7539534142:AAEw_w_34u6YX1dEWQXfQEevb917o_Cd6fQ")
-dp = Dispatcher()
+import config
+from telegram_bot.handlers import router
 
-# Хэндлер на команду /start
-@dp.message(Command("start"))
-async def cmd_start(message: types.Message):
-    await message.answer("Hello!")
 
 async def main():
-    await dp.start_polling(bot)
+    # Задаем параметры бота с parse_mode напрямую
+    bot = Bot(token=config.BOT_TOKEN)
+    dp = Dispatcher(storage=MemoryStorage())
+    dp.include_router(router)
 
-if __name__ == "__main__":
+    # Удаление вебхука и разрешение обновлений
+    await bot.delete_webhook(drop_pending_updates=True)
+    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+
+
+if __name__ == "__main__":  # Исправлено условие на правильное
+    logging.basicConfig(level=logging.INFO)
     asyncio.run(main())
