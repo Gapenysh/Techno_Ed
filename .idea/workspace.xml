@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9319c669-8e93-4dcd-be49-6ad2f30d17a0" name="Changes" comment="add buttons" />
+    <list default="true" id="9319c669-8e93-4dcd-be49-6ad2f30d17a0" name="Changes" comment="update">
+      <change afterPath="$PROJECT_DIR$/dal_models/themes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dal_models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/dal_models/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db_connection.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_connection.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -127,7 +132,15 @@
       <option name="project" value="LOCAL" />
       <updated>1729960045823</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="update">
+      <option name="closed" value="true" />
+      <created>1729960123605</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1729960123605</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -144,6 +157,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="start structure" />
     <MESSAGE value="add buttons" />
-    <option name="LAST_COMMIT_MESSAGE" value="add buttons" />
+    <MESSAGE value="update" />
+    <option name="LAST_COMMIT_MESSAGE" value="update" />
   </component>
 </project>
