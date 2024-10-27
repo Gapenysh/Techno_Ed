@@ -83,27 +83,19 @@ async def ask_next_question(message: types.Message, state: FSMContext, telegram_
 
 @router.message(QuestionStates.waiting_for_answer)
 async def handle_answer(message: types.Message, state: FSMContext):
-    # Получаем ответ пользователя и текущий вопрос
     user_answer = message.text
     data = await state.get_data()
     current_question_id = data['current_question_id']
     user_info = data['user_info']
 
-    # Извлекаем telegram_id из состояния
-    telegram_id = data.get('telegram_id')  # Извлекаем telegram_id
+    telegram_id = data.get('telegram_id')
 
-    # Сохраняем ответ пользователя в базу данных
-    print(current_question_id)
-    print(user_info[0])
-    print(user_answer)
     data_1 = ThemaBL.create_answer(current_question_id, user_info[0], user_answer)
     if data_1: print('удачно')
 
-    # Переходим к следующему вопросу
     data['current_question_index'] += 1
     await state.update_data(current_question_index=data['current_question_index'])
 
-    # Переход к следующему вопросу
     await ask_next_question(message, state, telegram_id)
 
 
@@ -113,6 +105,9 @@ async def finish_questions(message: types.Message, state: FSMContext, telegram_i
     user_info = UserBL.get_user_info(telegram_id)
     level_id = user_info[3]
     user_theme_id = user_info[2]
+
+    quest_and_answer = ThemaBL.get_quest_and_answer(user_info[0])
+    print(quest_and_answer)
 
     courses = ThemaBL.get_courses_by_theme_and_level(user_theme_id, level_id)
     message_text = f"Направление: {user_theme_id}\n\n"

@@ -34,4 +34,10 @@ class ThemaBL(object):
     def get_questions():
         data = ThemaDal.get_all_questions_theme()
 
+        return (data)
+
+    @staticmethod
+    def get_quest_and_answer(user_id: int):
+        data = ThemaDal.get_quest_and_answer(user_id)
+
         return data

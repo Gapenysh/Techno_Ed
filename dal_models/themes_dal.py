@@ -91,3 +91,22 @@ class ThemaDal(object):
             return e
         finally:
             conn.close()
+
+    @staticmethod
+    def get_quest_and_answer(user_id: int):
+        conn = connection_db()
+
+        try:
+            with conn.cursor() as cur:
+                stmt = f"""SELECT quest, answer FROM answers
+                           INNER JOIN questions ON answers.question_id = questions.id
+                           WHERE user_id = %s """
+                cur.execute(stmt, (user_id,))
+
+                result = cur.fetchall()
+            return result
+
+        except Exception as e:
+            return e
+        finally:
+            conn.close()
