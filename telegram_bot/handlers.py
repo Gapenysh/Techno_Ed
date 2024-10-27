@@ -1,11 +1,20 @@
 from aiogram import Router, types, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import CallbackQuery, Message
+from aiogram.fsm.state import State, StatesGroup  # Новый импорт для состояний
+from aiogram.fsm.context import FSMContext
+from aiogram import Bot
+from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.filters import Command
+
 
 from . import keyboards
 from . import text
 from bl_models.themes_bl import ThemaBL
 from bl_models.user_bl import UserBL
+
+class QuestionStates(StatesGroup):
+    waiting_for_answer = State()
+    current_question = State()
 
 router = Router()
 
@@ -41,14 +50,65 @@ async def show_theme_info(callback: CallbackQuery):
 
     await callback.message.answer(message)
 
+
 @router.callback_query(F.data.startswith("pick_theme"))
-async def pick_theme(callback: CallbackQuery):
+async def pick_theme(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer(text.text_pick_message)
+
+    questions = ThemaBL.get_questions()
     telegram_id = callback.from_user.id
     user_info = UserBL.get_user_info(telegram_id)
+
+    await state.update_data(questions=questions, user_info=user_info, current_question_index=0)
+
+    await ask_next_question(callback, state)
+
+async def ask_next_question(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    questions = data['questions']
+    current_question_index = data['current_question_index']
+
+    if current_question_index < len(questions):
+        question = questions[current_question_index]
+        await callback.answer(question[1])
+
+        await state.set_state(QuestionStates.waiting_for_answer)
+
+        await state.update_data(current_question_id=question[0])
+    else:
+        await message.answer("Спасибо большое за ваши ответы, мы их записали.")
+        await finish_questions(callback, state)
+
+@router.message(QuestionStates.waiting_for_answer)
+async def handle_answer(message: types.Message, state: FSMContext):
+    # Получаем ответ пользователя и текущий вопрос
+    user_answer = message.text
+    data = await state.get_data()
+    current_question_id = data['current_question_id']
+    user_info = data['user_info']
+
+    ThemaBL.create_answer(current_question_id, user_info[0], user_answer)
+
+    data['current_question_index'] += 1
+    await state.update_data(current_question_index=data['current_question_index'])
+
+    await ask_next_question(message, state)
+
+async def finish_questions(callback: CallbackQuery, state: FSMContext):
+    await state.finish()
+
+    data = await state.get_data()
+    user_info = data['user_info']
     level_id = user_info[3]
     user_theme_id = user_info[2]
+    courses = ThemaBL.get_courses_by_theme_and_level(user_theme_id, level_id)
 
+    message = f"Направление: {user_theme_id}\n\n"
+    for course in courses:
+        message += f"- {course[1]}\n"
+
+    level_id = user_info[3]
+    user_theme_id = user_info[2]
     courses = ThemaBL.get_courses_by_theme_and_level(user_theme_id, level_id)
 
     message = f"Направление: {theme_info[1]}\n\n"

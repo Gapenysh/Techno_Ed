@@ -78,13 +78,13 @@ class ThemaDal(object):
             conn.close()
 
     @staticmethod
-    def get_all_questions_theme(flag: str):
+    def get_all_questions_theme():
         conn = connection_db()
 
         try:
             with conn.cursor() as cur:
-                stmt = f"""SELECT * FROM questions WHERE flag = %s"""
-                cur.execute(stmt, (flag,))
+                stmt = f"""SELECT * FROM questions WHERE flag = 'themes' """
+                cur.execute(stmt)
                 result = cur.fetchall()
             return result
         except Exception as e:
