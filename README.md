@@ -25,11 +25,21 @@
    poetry install
     
 
-3. В файле сonfig.py и db_connection добавьте необходимые переменные окружения:
+3. В файле .env добавьте необходимые переменные окружения вида:
+
+DB_NAME=
+USER=
+PASSWORD=
+HOST=
+BOT_TOKEN=
+CLIENT_ID=
+GIGACHAT_API=
+AUTH_KEY=
 
 
 4. Запустите бота через файл main:
 
+run python main.py
 
 ## Команда авторов
 
