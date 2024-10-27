@@ -90,9 +90,6 @@ async def handle_answer(message: types.Message, state: FSMContext):
 
     telegram_id = data.get('telegram_id')
 
-    data_1 = ThemaBL.create_answer(current_question_id, user_info[0], user_answer)
-    if data_1: print('удачно')
-
     data['current_question_index'] += 1
     await state.update_data(current_question_index=data['current_question_index'])
 
