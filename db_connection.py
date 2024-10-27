@@ -2,9 +2,9 @@ import psycopg2
 
 
 def connection_db():
-    dbname = 'telegram_hack'
+    dbname = 'telegram_bd'
     user = 'postgres'
-    password = 'Ferry2431!'
+    password = 'Ramzilka25917'
     host = 'localhost'
     try:
         conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host)

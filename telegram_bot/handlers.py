@@ -5,8 +5,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram import Bot
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.filters import Command
-from sber_gigachat import generate_theme_user
 
+from sber_gigachat import generate_theme_user
 from . import keyboards
 from . import text
 from bl_models.themes_bl import ThemaBL
@@ -85,12 +85,13 @@ async def ask_next_question(message: types.Message, state: FSMContext, telegram_
 async def handle_answer(message: types.Message, state: FSMContext):
     user_answer = message.text
     data = await state.get_data()
-    print(data)
     current_question_id = data['current_question_id']
     user_info = data['user_info']
 
     telegram_id = data.get('telegram_id')
 
+    data_1 = ThemaBL.create_answer(current_question_id, user_info[0], user_answer)
+    if data_1: print('удачно')
     data['current_question_index'] += 1
     await state.update_data(current_question_index=data['current_question_index'])
 
@@ -105,28 +106,27 @@ async def finish_questions(message: types.Message, state: FSMContext, telegram_i
     user_theme_id = user_info[2]
 
     quest_and_answer = ThemaBL.get_quest_and_answer(user_info[0])
+
     result = generate_theme_user(quest_and_answer)
 
+    await message.answer(result)
+
     courses = ThemaBL.get_courses_by_theme_and_level(user_theme_id, level_id)
-    message_text = f"Направление: {result}"
+    message_text = f"Направление: {user_theme_id}\n\n"
+    for course in courses:
+        message_text += f"- {course[1]}\n"
 
     await message.answer(message_text)
 
 
 @router.callback_query(F.data == "teacher_communication")
-async def send_message_query(callback: CallbackQuery):
-    await callback.message.answer("Здесь можно будет узнать о курсах в IT академии!")
-
+async def get_themes(msg: Message):
+    await msg.answer(f"Здесь можно будет общаться с преподом!")
 
 @router.callback_query(F.data == "get_newsletter")
 async def get_themes(msg: Message):
     await msg.answer(f"Здесь можно будет отправлять рассылки и еще кое-что!")
 
-
 @router.callback_query(F.data == "get_vacancies_and_internships")
 async def get_themes(msg: Message):
     await msg.answer(f"Здесь будут выводиться все стажи и вакансии")
-
-
-
-
