@@ -30,6 +30,8 @@ class ThemaBL(object):
         else:
             return "Напишите, пожалуйста, ответ заново"
 
+
+
     @staticmethod
     def get_questions():
         data = ThemaDal.get_all_questions_theme()
