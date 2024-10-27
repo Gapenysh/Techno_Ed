@@ -29,8 +29,8 @@ def get_bot_response_courses(query, courses):
 def generate_theme_user(question_answer):
     messages = [
         SystemMessage(content="Пользователь ответил на серию вопросов, которые проверяют его предпочитаемое направление"
-                              "Сделай выбор между значениями: Frontend, Backend, UI/UIX designer, Dev-ops"
-                              f"На основе данных:{question_answer}")
+                              "передай одно из перечисленных слов: Frontend, Backend, UI/UIX designer, Dev-ops,"
+                              f"которое подходит человеку по данным: {question_answer}")
     ]
 
 
@@ -40,10 +40,10 @@ def generate_theme_user(question_answer):
     return res.content
 
 def generate_level_user(answers, questions):
-    messages = [SystemMessage(content="Пользователь ответил на серию вопросов, которые проверяют его предположительный уровень сложности в"
-                              "Сделай выбор между значениями: Frontend, Backend, UI/UIX designer, Dev-ops"
+    messages = [SystemMessage(content="Пользователь ответил на серию вопросов, которые проверяют его предположительный уровень сложности для курсов, который может пройти"
+                              "Сделай выбор между значениями: Легкий, Средний, Сложный"
                               f"На основе данных:{questions}, {answers} (Порядок вопросов/ответов совпадает)")]
-    messages.append(HumanMessage(content=query))
+
 
     res = chat.invoke(messages)
     messages.append(res)
