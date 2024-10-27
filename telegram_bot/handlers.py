@@ -109,6 +109,8 @@ async def finish_questions(message: types.Message, state: FSMContext, telegram_i
 
     result = generate_theme_user(quest_and_answer)
 
+    UserBL.edit_user_theme(name)
+
     await message.answer(result)
 
     courses = ThemaBL.get_courses_by_theme_and_level(user_theme_id, level_id)

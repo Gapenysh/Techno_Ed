@@ -8,3 +8,6 @@ class UserBL(object):
         user_info = UserDal.get_user_info(telegram_id)
 
         return user_info
+
+    @staticmethods
+    def edit_user_theme(name):
