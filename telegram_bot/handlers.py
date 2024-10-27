@@ -113,6 +113,7 @@ async def finish_questions(message: types.Message, state: FSMContext, telegram_i
 
     await message.answer(result)
 
+
     courses = ThemaBL.get_courses_by_theme_and_level(user_theme_id, level_id)
     message_text = f"Направление: {user_theme_id}\n\n"
     for course in courses:

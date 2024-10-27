@@ -9,5 +9,17 @@ class UserBL(object):
 
         return user_info
 
-    @staticmethods
+    @staticmethod
     def edit_user_theme(name):
+        success = UserDal.edit_user_theme(name)
+
+        if not success:
+            return False
+        return success
+    @staticmethod
+    def add_pdf_resume(pdf_file):
+        success = UserDal.add_resume(pdf_file)
+
+        if not success:
+            return False
+        return success
