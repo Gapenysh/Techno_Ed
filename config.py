@@ -1,7 +1,8 @@
-#telegram
-BOT_TOKEN = '7322304567:AAE9GtU86rm6j99qKnMNKa-u_ZUV7k8i3T4'
+import os
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 #sber_gigachat
-client_id = 'ed98251d-a7e8-4e7b-8c4b-99fde38816d4'
-auth_key = 'ZWQ5ODI1MWQtYTdlOC00ZTdiLThjNGItOTlmZGUzODgxNmQ0OjFiYjU2MWIxLTcxM2YtNDlhMC04OTM2LTZkN2Q3YTFiOThkOA=='
-gigachat_api = "Y2U3MmFkYTEtMGIzNC00M2UwLTliNGYtYjRhMGFhODUzYTFhOmE2ZTliZTY5LWNlNWEtNGM1ZS1iYjVlLWY2ZGY5MjJjNTM3OQ=="
+client_id = os.getenv("CLIENT_ID")
+auth_key = os.getenv("AUTH_KEY")
+gigachat_api = os.getenv("GIGACHAT_API")
