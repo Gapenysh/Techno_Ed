@@ -27,10 +27,12 @@ def get_bot_response_courses(query, courses):
 
 
 def generate_theme_user(question_answer):
+    questions = [q for q, a in question_answer]
+    answers = [a for q, a in question_answer]
     messages = [
-        SystemMessage(content="Пользователь ответил на серию вопросов, которые проверяют его предпочитаемое направление"
+        SystemMessage(content=f"Пользователь ответил на серию вопросов: {questions}, которые проверяют его предпочитаемое направление"
                               "передай одно из перечисленных слов: Frontend, Backend, UI/UIX designer, Dev-ops,"
-                              f"которое подходит человеку по данным: {question_answer}")
+                              f"которое подходит человеку по его ответам на перчесленные вопросы: {answers} (порядок вопросов и ответов совпадает)")
     ]
 
 
