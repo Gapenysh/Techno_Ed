@@ -1,6 +1,6 @@
 from db_connection import connection_db
 
-class Vacansy:
+class VacansyDAL:
 
     @staticmethod
     def get_vacansy():

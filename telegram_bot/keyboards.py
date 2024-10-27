@@ -1,5 +1,6 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from bl_models.themes_bl import ThemaBL
+from bl_models.vacancy_bl import VacancyBL
 
 
 menu=[[InlineKeyboardButton(text="Направления", callback_data='get_themes')],
@@ -23,6 +24,9 @@ def generate_buttons(themes) -> list:
         callback_data="pick_theme"
     )
 
+
+
+
     back_menu = InlineKeyboardButton(
         text="Вернуться в меню",
         callback_data="back_menu"
@@ -33,6 +37,8 @@ def generate_buttons(themes) -> list:
     return buttons
 
 
+data_vacancies = VacancyBL.get_vacancies()
 data_themes = ThemaBL.get_themes()
+
 themes = InlineKeyboardMarkup(inline_keyboard=generate_buttons(data_themes))
 menu = InlineKeyboardMarkup(inline_keyboard=menu)

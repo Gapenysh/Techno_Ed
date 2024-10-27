@@ -1,16 +1,19 @@
 from aiogram import Router, types, F
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup
 from aiogram.fsm.state import State, StatesGroup  # Новый импорт для состояний
 from aiogram.fsm.context import FSMContext
 from aiogram import Bot
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.filters import Command
 
+from bl_models.vacancy_bl import VacancyBL
 from sber_gigachat import generate_theme_user
 from . import keyboards
 from . import text
 from bl_models.themes_bl import ThemaBL
 from bl_models.user_bl import UserBL
+
+
 
 class QuestionStates(StatesGroup):
     waiting_for_answer = State()
@@ -109,7 +112,7 @@ async def finish_questions(message: types.Message, state: FSMContext, telegram_i
 
     result = generate_theme_user(quest_and_answer)
 
-    UserBL.edit_user_theme(name)
+    UserBL.edit_user_theme(result)
 
     await message.answer(result)
 
@@ -131,5 +134,9 @@ async def get_themes(msg: Message):
     await msg.answer(f"Здесь можно будет отправлять рассылки и еще кое-что!")
 
 @router.callback_query(F.data == "get_vacancies_and_internships")
-async def get_themes(msg: Message):
-    await msg.answer(f"Здесь будут выводиться все стажи и вакансии")
+async def get_vacancies_interships(callback: CallbackQuery):
+
+    data_vacancies = VacancyBL.get_vacancies()
+
+
+    await callback.message.answer("Вакансии и стажировки:", reply_markup=data_vacancies)
