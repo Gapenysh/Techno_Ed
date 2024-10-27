@@ -6,11 +6,11 @@
 
 ## Технологический стек
 
-- Python
+- Python (3.12)
 - aiogram (для работы с Telegram API)
 - psycopg2 (для работы с PostgreSQL)
 - Poetry (для управления зависимостями)
-- github
+
 
 ## Как запустить проект
 
