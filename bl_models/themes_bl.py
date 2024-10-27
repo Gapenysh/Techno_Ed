@@ -17,5 +17,13 @@ class ThemaBL(object):
     @staticmethod
     def get_courses_by_theme_and_level(theme_id: int, level_id: int):
         courses_data = ThemaDal.get_courses_by_theme_and_level(theme_id, level_id)
-
         return courses_data
+
+    @staticmethod
+    def create_answer(question_id, user_id, answer):
+        data = ThemaDal.create_answer(question_id, user_id, answer)
+
+        if data:
+            return "Ваш ответ успешно записан!"
+        else:
+            return "Напишите, пожалуйста, ответ заново"

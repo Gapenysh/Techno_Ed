@@ -57,3 +57,23 @@ class ThemaDal(object):
 
         finally:
             conn.close()
+
+    @staticmethod
+    def create_answer(question_id, user_id, answer):
+        conn = connection_db()
+
+        try:
+            with conn.cursor() as cursor:
+                query = f"INSERT INTO answers (question_id, answer, user_id) values (%s, %s, %s) returning id"
+                cursor.execute(query, (theme_id, question_id, user_id, answer))
+                data = cursor.fetchone()
+                conn.commit()
+
+                return data
+
+        except Exception as e:
+            return e
+
+        finally:
+            conn.close()
+

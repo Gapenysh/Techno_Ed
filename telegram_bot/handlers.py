@@ -43,7 +43,7 @@ async def show_theme_info(callback: CallbackQuery):
 
 @router.callback_query(F.data.startswith("pick_theme"))
 async def pick_theme(callback: CallbackQuery):
-    # ----
+    await callback.message.answer(text.text_pick_message)
     telegram_id = callback.from_user.id
     user_info = UserBL.get_user_info(telegram_id)
     level_id = user_info[3]
