@@ -1,5 +1,5 @@
 #telegram
-BOT_TOKEN = '7539534142:AAEw_w_34u6YX1dEWQXfQEevb917o_Cd6fQ'
+BOT_TOKEN = '7322304567:AAE9GtU86rm6j99qKnMNKa-u_ZUV7k8i3T4'
 
 #sber_gigachat
 client_id = 'ed98251d-a7e8-4e7b-8c4b-99fde38816d4'

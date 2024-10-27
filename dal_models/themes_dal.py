@@ -65,7 +65,7 @@ class ThemaDal(object):
         try:
             with conn.cursor() as cursor:
                 query = f"INSERT INTO answers (question_id, answer, user_id) values (%s, %s, %s) returning id"
-                cursor.execute(query, (theme_id, question_id, user_id, answer))
+                cursor.execute(query, ( question_id, user_id, answer))
                 data = cursor.fetchone()
                 conn.commit()
 
@@ -77,3 +77,17 @@ class ThemaDal(object):
         finally:
             conn.close()
 
+    @staticmethod
+    def get_all_questions_theme(flag: str):
+        conn = connection_db()
+
+        try:
+            with conn.cursor() as cur:
+                stmt = f"""SELECT * FROM questions WHERE flag = %s"""
+                cur.execute(stmt, (flag,))
+                result = cur.fetchall()
+            return result
+        except Exception as e:
+            return e
+        finally:
+            conn.close()
