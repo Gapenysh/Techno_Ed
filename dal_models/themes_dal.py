@@ -65,7 +65,7 @@ class ThemaDal(object):
         try:
             with conn.cursor() as cursor:
                 query = f"INSERT INTO answers (question_id, answer, user_id) values (%s, %s, %s) returning id"
-                cursor.execute(query, ( question_id, user_id, answer))
+                cursor.execute(query, (question_id, answer, user_id))
                 data = cursor.fetchone()
                 conn.commit()
 

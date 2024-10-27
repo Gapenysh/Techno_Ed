@@ -24,7 +24,9 @@ class ThemaBL(object):
         data = ThemaDal.create_answer(question_id, user_id, answer)
 
         if data:
-            return "Ваш ответ успешно записан!"
+            print(data)
+            return data
+
         else:
             return "Напишите, пожалуйста, ответ заново"
 

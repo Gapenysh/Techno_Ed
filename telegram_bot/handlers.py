@@ -53,31 +53,33 @@ async def show_theme_info(callback: CallbackQuery):
 
 @router.callback_query(F.data.startswith("pick_theme"))
 async def pick_theme(callback: CallbackQuery, state: FSMContext):
-    await callback.message.answer(text.text_pick_message)
-
-    questions = ThemaBL.get_questions()
     telegram_id = callback.from_user.id
+
+    await callback.message.answer("Пожалуйста, выберите направление")
+    questions = ThemaBL.get_questions()
     user_info = UserBL.get_user_info(telegram_id)
 
-    await state.update_data(questions=questions, user_info=user_info, current_question_index=0)
+    # Сохраняем telegram_id в состоянии
+    await state.update_data(telegram_id=telegram_id, questions=questions, user_info=user_info, current_question_index=0)
 
-    await ask_next_question(callback, state)
+    await ask_next_question(callback.message, state, telegram_id)
 
-async def ask_next_question(callback: CallbackQuery, state: FSMContext):
+
+async def ask_next_question(message: types.Message, state: FSMContext, telegram_id: int):
     data = await state.get_data()
     questions = data['questions']
     current_question_index = data['current_question_index']
 
     if current_question_index < len(questions):
-        question = questions[current_question_index]
-        await callback.answer(question[1])
+        question_text = questions[current_question_index][1]
+        await message.answer(question_text)
 
         await state.set_state(QuestionStates.waiting_for_answer)
-
-        await state.update_data(current_question_id=question[0])
+        await state.update_data(current_question_id=questions[current_question_index][0])
     else:
         await message.answer("Спасибо большое за ваши ответы, мы их записали.")
-        await finish_questions(callback, state)
+        await finish_questions(message, state, telegram_id)
+
 
 @router.message(QuestionStates.waiting_for_answer)
 async def handle_answer(message: types.Message, state: FSMContext):
@@ -87,36 +89,37 @@ async def handle_answer(message: types.Message, state: FSMContext):
     current_question_id = data['current_question_id']
     user_info = data['user_info']
 
-    ThemaBL.create_answer(current_question_id, user_info[0], user_answer)
+    # Извлекаем telegram_id из состояния
+    telegram_id = data.get('telegram_id')  # Извлекаем telegram_id
 
+    # Сохраняем ответ пользователя в базу данных
+    print(current_question_id)
+    print(user_info[0])
+    print(user_answer)
+    data_1 = ThemaBL.create_answer(current_question_id, user_info[0], user_answer)
+    if data_1: print('удачно')
+
+    # Переходим к следующему вопросу
     data['current_question_index'] += 1
     await state.update_data(current_question_index=data['current_question_index'])
 
-    await ask_next_question(message, state)
+    # Переход к следующему вопросу
+    await ask_next_question(message, state, telegram_id)
 
-async def finish_questions(callback: CallbackQuery, state: FSMContext):
-    await state.finish()
 
-    data = await state.get_data()
-    user_info = data['user_info']
+async def finish_questions(message: types.Message, state: FSMContext, telegram_id: int):
+    await state.clear()
+
+    user_info = UserBL.get_user_info(telegram_id)
     level_id = user_info[3]
     user_theme_id = user_info[2]
-    courses = ThemaBL.get_courses_by_theme_and_level(user_theme_id, level_id)
 
-    message = f"Направление: {user_theme_id}\n\n"
+    courses = ThemaBL.get_courses_by_theme_and_level(user_theme_id, level_id)
+    message_text = f"Направление: {user_theme_id}\n\n"
     for course in courses:
-        message += f"- {course[1]}\n"
+        message_text += f"- {course[1]}\n"
 
-    level_id = user_info[3]
-    user_theme_id = user_info[2]
-    courses = ThemaBL.get_courses_by_theme_and_level(user_theme_id, level_id)
-
-    message = f"Направление: {theme_info[1]}\n\n"
-    message += f"{theme_info[2]}\n"
-
-    await callback.message.answer(message)
-
-
+    await message.answer(message_text)
 
 
 @router.callback_query(F.data == "teacher_communication")
