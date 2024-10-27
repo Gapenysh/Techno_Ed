@@ -1,0 +1,211 @@
+Index: sber_gigachat/utils.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from langchain_community.chat_models.gigachat import GigaChat\r\nfrom langchain.schema import HumanMessage, SystemMessage\r\nfrom config import gigachat_api\r\n\r\nimport json\r\n\r\nchat = GigaChat(credentials=gigachat_api,\r\n                verify_ssl_certs=False)\r\n\r\nwith open('courses.json', \"r\",encoding='utf-8') as file:\r\n    data = json.load(file)\r\n\r\ncourses = data\r\nprint(courses)\r\n\r\nquery = input(\"Query: \")\r\ndef get_bot_response(query, courses):\r\n    messages = [\r\n        SystemMessage(content=f\"Тебе задают организационный вопрос: {query} по поводу всяких курсов и преподавания. \"\r\n                              f\"Дай обоснованный, подробный ответ, который удовлетворит спрашивающего, основываясь только на данные {courses}\")\r\n    ]\r\n    messages.append(HumanMessage(content=query))\r\n\r\n    res = chat.invoke(messages)\r\n    messages.append(res)\r\n\r\n    return res.content\r\n\r\n\r\n\r\nprint(get_bot_response(query, courses))
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sber_gigachat/utils.py b/sber_gigachat/utils.py
+--- a/sber_gigachat/utils.py	(revision 53104a4c8f45c9d867b1741a4d9709f5219af975)
++++ b/sber_gigachat/utils.py	(date 1729991974930)
+@@ -14,7 +14,7 @@
+ print(courses)
+ 
+ query = input("Query: ")
+-def get_bot_response(query, courses):
++def get_bot_response_courses(query, courses):
+     messages = [
+         SystemMessage(content=f"Тебе задают организационный вопрос: {query} по поводу всяких курсов и преподавания. "
+                               f"Дай обоснованный, подробный ответ, который удовлетворит спрашивающего, основываясь только на данные {courses}")
+@@ -27,5 +27,28 @@
+     return res.content
+ 
+ 
++def generate_theme_user(answers, questions):
++    messages = [
++        SystemMessage(content="Пользователь ответил на серию вопросов, которые проверяют его предпочитаемое направление"
++                              "Сделай выбор между значениями: Frontend, Backend, UI/UIX designer, Dev-ops"
++                              f"На основе данных:{questions}, {answers} (Порядок вопросов/ответов совпадает)")
++    ]
++    messages.append(HumanMessage(content=query))
++
++    res = chat.invoke(messages)
++    messages.append(res)
++
++    return res.content
++
++def generate_level_user(answers, questions):
++    messages = [SystemMessage(content="Пользователь ответил на серию вопросов, которые проверяют его предположительный уровень сложности в"
++                              "Сделай выбор между значениями: Frontend, Backend, UI/UIX designer, Dev-ops"
++                              f"На основе данных:{questions}, {answers} (Порядок вопросов/ответов совпадает)")]
++    messages.append(HumanMessage(content=query))
++
++    res = chat.invoke(messages)
++    messages.append(res)
++
++    return res.content
+ 
+-print(get_bot_response(query, courses))
+\ No newline at end of file
++print(gene(query, courses))
+\ No newline at end of file
+Index: db_connection.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import psycopg2\r\n\r\n\r\ndef connection_db():\r\n    dbname = 'telegram_bd'\r\n    user = 'postgres'\r\n    password = 'Ramzilka25917'\r\n    host = 'localhost'\r\n    try:\r\n        conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host)\r\n        return conn\r\n\r\n    except:\r\n        return {\"message\": \"can`t establish connection to database\"}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/db_connection.py b/db_connection.py
+--- a/db_connection.py	(revision 53104a4c8f45c9d867b1741a4d9709f5219af975)
++++ b/db_connection.py	(date 1729985653403)
+@@ -2,9 +2,9 @@
+ 
+ 
+ def connection_db():
+-    dbname = 'telegram_bd'
++    dbname = 'telegram_hack'
+     user = 'postgres'
+-    password = 'Ramzilka25917'
++    password = 'Ferry2431!'
+     host = 'localhost'
+     try:
+         conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host)
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"9319c669-8e93-4dcd-be49-6ad2f30d17a0\" name=\"Changes\" comment=\"create themes_courses\" />\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Python Script\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitHubPullRequestSearchHistory\">{\r\n  &quot;lastFilter&quot;: {\r\n    &quot;state&quot;: &quot;OPEN&quot;,\r\n    &quot;assignee&quot;: &quot;AbdullinRR&quot;\r\n  }\r\n}</component>\r\n  <component name=\"GithubPullRequestsUISettings\">{\r\n  &quot;selectedUrlAndAccountId&quot;: {\r\n    &quot;url&quot;: &quot;https://github.com/Gapenysh/Techno_Ed.git&quot;,\r\n    &quot;accountId&quot;: &quot;553dbff4-694e-4fbb-b85b-3c527105cef2&quot;\r\n  }\r\n}</component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 4\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2nyIzVMhVTtZkwmmU4v6DDpO1Ho\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\">\r\n    <OptionsSetting value=\"false\" id=\"Update\" />\r\n    <ConfirmationsSetting value=\"2\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">{\r\n  &quot;keyToString&quot;: {\r\n    &quot;Python.main.executor&quot;: &quot;Run&quot;,\r\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\r\n    &quot;git-widget-placeholder&quot;: &quot;master&quot;\r\n  }\r\n}</component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\user\\PycharmProjects\\Techno_Ed1\\telegram_bot\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"main\" type=\"PythonConfigurationType\" factoryName=\"Python\" nameIsGenerated=\"true\">\r\n      <module name=\"Telegarm_bot_hack21\" />\r\n      <option name=\"ENV_FILES\" value=\"\" />\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <envs>\r\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\r\n      </envs>\r\n      <option name=\"SDK_HOME\" value=\"\" />\r\n      <option name=\"SDK_NAME\" value=\"Python 3.12\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"false\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <option name=\"SCRIPT_NAME\" value=\"$PROJECT_DIR$/main.py\" />\r\n      <option name=\"PARAMETERS\" value=\"\" />\r\n      <option name=\"SHOW_COMMAND_LINE\" value=\"false\" />\r\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\r\n      <option name=\"MODULE_MODE\" value=\"false\" />\r\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\r\n      <option name=\"INPUT_FILE\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n  </component>\r\n  <component name=\"SharedIndexes\">\r\n    <attachedChunks>\r\n      <set>\r\n        <option value=\"bundled-python-sdk-0e3be3396995-c546a90a8094-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-242.23339.19\" />\r\n      </set>\r\n    </attachedChunks>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"9319c669-8e93-4dcd-be49-6ad2f30d17a0\" name=\"Changes\" comment=\"\" />\r\n      <created>1729939152319</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1729939152319</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"start structure\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729953282521</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729953282521</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"start structure\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729956926295</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729956926295</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"add buttons\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729958190533</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729958190533</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"add buttons\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729960045823</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729960045823</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00005\" summary=\"update\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729960123605</created>\r\n      <option name=\"number\" value=\"00005\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729960123605</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00006\" summary=\"create themes_courses\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729984942762</created>\r\n      <option name=\"number\" value=\"00006\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00006\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729984942762</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"7\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"start structure\" />\r\n    <MESSAGE value=\"add buttons\" />\r\n    <MESSAGE value=\"update\" />\r\n    <MESSAGE value=\"create themes_courses\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"create themes_courses\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 53104a4c8f45c9d867b1741a4d9709f5219af975)
++++ b/.idea/workspace.xml	(date 1729992673221)
+@@ -4,7 +4,12 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="9319c669-8e93-4dcd-be49-6ad2f30d17a0" name="Changes" comment="create themes_courses" />
++    <list default="true" id="9319c669-8e93-4dcd-be49-6ad2f30d17a0" name="Changes" comment="update">
++      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/db_connection.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_connection.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/sber_gigachat/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/sber_gigachat/utils.py" afterDir="false" />
++    </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+@@ -37,7 +42,6 @@
+ }</component>
+   <component name="ProjectId" id="2nyIzVMhVTtZkwmmU4v6DDpO1Ho" />
+   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+-    <OptionsSetting value="false" id="Update" />
+     <ConfirmationsSetting value="2" id="Add" />
+   </component>
+   <component name="ProjectViewState">
+@@ -47,6 +51,7 @@
+   <component name="PropertiesComponent">{
+   &quot;keyToString&quot;: {
+     &quot;Python.main.executor&quot;: &quot;Run&quot;,
++    &quot;Python.utils.executor&quot;: &quot;Run&quot;,
+     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+     &quot;git-widget-placeholder&quot;: &quot;master&quot;
+   }
+@@ -56,7 +61,7 @@
+       <recent name="C:\Users\user\PycharmProjects\Techno_Ed1\telegram_bot" />
+     </key>
+   </component>
+-  <component name="RunManager">
++  <component name="RunManager" selected="Python.main">
+     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+       <module name="Telegarm_bot_hack21" />
+       <option name="ENV_FILES" value="" />
+@@ -66,9 +71,8 @@
+         <env name="PYTHONUNBUFFERED" value="1" />
+       </envs>
+       <option name="SDK_HOME" value="" />
+-      <option name="SDK_NAME" value="Python 3.12" />
+       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+-      <option name="IS_MODULE_SDK" value="false" />
++      <option name="IS_MODULE_SDK" value="true" />
+       <option name="ADD_CONTENT_ROOTS" value="true" />
+       <option name="ADD_SOURCE_ROOTS" value="true" />
+       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+@@ -80,6 +84,33 @@
+       <option name="INPUT_FILE" value="" />
+       <method v="2" />
+     </configuration>
++    <configuration name="utils" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
++      <module name="Telegarm_bot_hack21" />
++      <option name="ENV_FILES" value="" />
++      <option name="INTERPRETER_OPTIONS" value="" />
++      <option name="PARENT_ENVS" value="true" />
++      <envs>
++        <env name="PYTHONUNBUFFERED" value="1" />
++      </envs>
++      <option name="SDK_HOME" value="" />
++      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/sber_gigachat" />
++      <option name="IS_MODULE_SDK" value="true" />
++      <option name="ADD_CONTENT_ROOTS" value="true" />
++      <option name="ADD_SOURCE_ROOTS" value="true" />
++      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sber_gigachat/utils.py" />
++      <option name="PARAMETERS" value="" />
++      <option name="SHOW_COMMAND_LINE" value="false" />
++      <option name="EMULATE_TERMINAL" value="false" />
++      <option name="MODULE_MODE" value="false" />
++      <option name="REDIRECT_INPUT" value="false" />
++      <option name="INPUT_FILE" value="" />
++      <method v="2" />
++    </configuration>
++    <recent_temporary>
++      <list>
++        <item itemvalue="Python.utils" />
++      </list>
++    </recent_temporary>
+   </component>
+   <component name="SharedIndexes">
+     <attachedChunks>
+@@ -137,15 +168,7 @@
+       <option name="project" value="LOCAL" />
+       <updated>1729960123605</updated>
+     </task>
+-    <task id="LOCAL-00006" summary="create themes_courses">
+-      <option name="closed" value="true" />
+-      <created>1729984942762</created>
+-      <option name="number" value="00006" />
+-      <option name="presentableId" value="LOCAL-00006" />
+-      <option name="project" value="LOCAL" />
+-      <updated>1729984942762</updated>
+-    </task>
+-    <option name="localTasksCounter" value="7" />
++    <option name="localTasksCounter" value="6" />
+     <servers />
+   </component>
+   <component name="Vcs.Log.Tabs.Properties">
+@@ -163,7 +186,6 @@
+     <MESSAGE value="start structure" />
+     <MESSAGE value="add buttons" />
+     <MESSAGE value="update" />
+-    <MESSAGE value="create themes_courses" />
+-    <option name="LAST_COMMIT_MESSAGE" value="create themes_courses" />
++    <option name="LAST_COMMIT_MESSAGE" value="update" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: config.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#telegram\r\nBOT_TOKEN = '7539534142:AAEw_w_34u6YX1dEWQXfQEevb917o_Cd6fQ'\r\n\r\n#sber_gigachat\r\nclient_id = 'ed98251d-a7e8-4e7b-8c4b-99fde38816d4'\r\nauth_key = 'ZWQ5ODI1MWQtYTdlOC00ZTdiLThjNGItOTlmZGUzODgxNmQ0OjFiYjU2MWIxLTcxM2YtNDlhMC04OTM2LTZkN2Q3YTFiOThkOA=='\r\ngigachat_api = \"Y2U3MmFkYTEtMGIzNC00M2UwLTliNGYtYjRhMGFhODUzYTFhOmE2ZTliZTY5LWNlNWEtNGM1ZS1iYjVlLWY2ZGY5MjJjNTM3OQ==\"
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/config.py b/config.py
+--- a/config.py	(revision 53104a4c8f45c9d867b1741a4d9709f5219af975)
++++ b/config.py	(date 1729985589293)
+@@ -1,5 +1,5 @@
+ #telegram
+-BOT_TOKEN = '7539534142:AAEw_w_34u6YX1dEWQXfQEevb917o_Cd6fQ'
++BOT_TOKEN = '7322304567:AAE9GtU86rm6j99qKnMNKa-u_ZUV7k8i3T4'
+ 
+ #sber_gigachat
+ client_id = 'ed98251d-a7e8-4e7b-8c4b-99fde38816d4'

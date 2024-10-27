@@ -1,0 +1,163 @@
+Index: dal_models/vacancy_dal.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from db_connection import connection_db\r\n\r\nclass Vacancy:\r\n\r\n    @staticmethod\r\n    def get_vacancy():\r\n        pass\r\n    @staticmethod\r\n    def get_intership():\r\n        pass
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/dal_models/vacancy_dal.py b/dal_models/vacancy_dal.py
+--- a/dal_models/vacancy_dal.py	(revision 77946ff181cef2ac8676396a4f528d4caa0e3a18)
++++ b/dal_models/vacancy_dal.py	(date 1730010013739)
+@@ -1,10 +1,32 @@
+ from db_connection import connection_db
+ 
+-class Vacancy:
++class Vacansy:
+ 
+     @staticmethod
+-    def get_vacancy():
+-        pass
++    def get_vacansy():
++        conn = connection_db()
++        try:
++            with conn.cursor() as cur:
++                stmt="""SELECT * FROM vacansy"""
++                cur.execute(stmt)
++                result = cur.fetchall()
++            return result
++        except Exception as e:
++            return e
++        finally:
++            conn.close()
+     @staticmethod
+     def get_intership():
+-        pass
+\ No newline at end of file
++        conn = connection_db()
++        try:
++            with conn.cursor() as cur:
++                stmt = """SELECT * FROM intership"""
++                cur.execute(stmt)
++                result = cur.fetchall()
++            return result
++        except Exception as e:
++            return e
++        finally:
++            conn.close()
++
++    
+\ No newline at end of file
+Index: telegram_bot/handlers.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from aiogram import Router, types, F\r\nfrom aiogram.types import CallbackQuery, Message\r\nfrom aiogram.fsm.state import State, StatesGroup  # Новый импорт для состояний\r\nfrom aiogram.fsm.context import FSMContext\r\nfrom aiogram import Bot\r\nfrom aiogram.fsm.storage.memory import MemoryStorage\r\nfrom aiogram.filters import Command\r\nfrom sber_gigachat import generate_theme_user\r\n\r\nfrom . import keyboards\r\nfrom . import text\r\nfrom bl_models.themes_bl import ThemaBL\r\nfrom bl_models.user_bl import UserBL\r\n\r\nclass QuestionStates(StatesGroup):\r\n    waiting_for_answer = State()\r\n    current_question = State()\r\n\r\nrouter = Router()\r\n\r\n\r\n@router.message(Command(\"start\"))\r\nasync def start_handler(msg: Message):\r\n    await msg.answer(text.start_message.format(name=msg.from_user.full_name), reply_markup=keyboards.menu)\r\n\r\n@router.message(F.text == \"Меню\")\r\n@router.message(F.text == \"Выйти в меню\")\r\nasync def message_handler(msg: Message):\r\n    await msg.answer(f\"Вы вышли в меню!\")\r\n\r\n@router.callback_query(F.data == \"get_themes\")\r\nasync def get_themes(callback: CallbackQuery):\r\n    await callback.message.answer(text.get_themes_message, reply_markup=keyboards.themes)\r\n\r\n\r\n@router.callback_query(F.data.startswith(\"theme_info_\"))\r\nasync def show_theme_info(callback: CallbackQuery):\r\n    theme_id = callback.data.split(\"_\")[2]\r\n    theme_info = ThemaBL.get_theme_info(theme_id)\r\n    telegram_id = callback.from_user.id\r\n    user_info = UserBL.get_user_info(telegram_id)\r\n    level_id = user_info[3]\r\n\r\n    courses = ThemaBL.get_courses_by_theme_and_level(theme_id, level_id)\r\n\r\n\r\n    message = f\"Направление: {theme_info[1]}\\n\\n\"\r\n    message += f\"{theme_info[2]}\\n\"\r\n    message += f\"{courses}\"\r\n\r\n    await callback.message.answer(message)\r\n\r\n\r\n@router.callback_query(F.data.startswith(\"pick_theme\"))\r\nasync def pick_theme(callback: CallbackQuery, state: FSMContext):\r\n    telegram_id = callback.from_user.id\r\n\r\n    await callback.message.answer(\"Пожалуйста, выберите направление\")\r\n    questions = ThemaBL.get_questions()\r\n    user_info = UserBL.get_user_info(telegram_id)\r\n\r\n    # Сохраняем telegram_id в состоянии\r\n    await state.update_data(telegram_id=telegram_id, questions=questions, user_info=user_info, current_question_index=0)\r\n\r\n    await ask_next_question(callback.message, state, telegram_id)\r\n\r\n\r\nasync def ask_next_question(message: types.Message, state: FSMContext, telegram_id: int):\r\n    data = await state.get_data()\r\n    questions = data['questions']\r\n    current_question_index = data['current_question_index']\r\n\r\n    if current_question_index < len(questions):\r\n        question_text = questions[current_question_index][1]\r\n        await message.answer(question_text)\r\n\r\n        await state.set_state(QuestionStates.waiting_for_answer)\r\n        await state.update_data(current_question_id=questions[current_question_index][0])\r\n    else:\r\n        await message.answer(\"Спасибо большое за ваши ответы, мы их записали.\")\r\n        await finish_questions(message, state, telegram_id)\r\n\r\n\r\n@router.message(QuestionStates.waiting_for_answer)\r\nasync def handle_answer(message: types.Message, state: FSMContext):\r\n    user_answer = message.text\r\n    data = await state.get_data()\r\n    print(data)\r\n    current_question_id = data['current_question_id']\r\n    user_info = data['user_info']\r\n\r\n    telegram_id = data.get('telegram_id')\r\n\r\n    data['current_question_index'] += 1\r\n    await state.update_data(current_question_index=data['current_question_index'])\r\n\r\n    await ask_next_question(message, state, telegram_id)\r\n\r\n\r\nasync def finish_questions(message: types.Message, state: FSMContext, telegram_id: int):\r\n    await state.clear()\r\n\r\n    user_info = UserBL.get_user_info(telegram_id)\r\n    level_id = user_info[3]\r\n    user_theme_id = user_info[2]\r\n\r\n    quest_and_answer = ThemaBL.get_quest_and_answer(user_info[0])\r\n    result = generate_theme_user(quest_and_answer)\r\n\r\n    courses = ThemaBL.get_courses_by_theme_and_level(user_theme_id, level_id)\r\n    message_text = f\"Направление: {result}\"\r\n\r\n    await message.answer(message_text)\r\n\r\n\r\n@router.callback_query(F.data == \"teacher_communication\")\r\nasync def send_message_query(callback: CallbackQuery):\r\n    await callback.message.answer(\"Здесь можно будет узнать о курсах в IT академии!\")\r\n\r\n\r\n@router.callback_query(F.data == \"get_newsletter\")\r\nasync def get_themes(msg: Message):\r\n    await msg.answer(f\"Здесь можно будет отправлять рассылки и еще кое-что!\")\r\n\r\n\r\n@router.callback_query(F.data == \"get_vacancies_and_internships\")\r\nasync def get_themes(msg: Message):\r\n    await msg.answer(f\"Здесь будут выводиться все стажи и вакансии\")\r\n\r\n\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/telegram_bot/handlers.py b/telegram_bot/handlers.py
+--- a/telegram_bot/handlers.py	(revision 77946ff181cef2ac8676396a4f528d4caa0e3a18)
++++ b/telegram_bot/handlers.py	(date 1730009105092)
+@@ -107,6 +107,7 @@
+     quest_and_answer = ThemaBL.get_quest_and_answer(user_info[0])
+     result = generate_theme_user(quest_and_answer)
+ 
++
+     courses = ThemaBL.get_courses_by_theme_and_level(user_theme_id, level_id)
+     message_text = f"Направление: {result}"
+ 
+Index: sber_gigachat/utils.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from langchain_community.chat_models.gigachat import GigaChat\r\nfrom langchain.schema import HumanMessage, SystemMessage\r\nfrom config import gigachat_api\r\n\r\nimport json\r\n\r\nchat = GigaChat(credentials=gigachat_api,\r\n                verify_ssl_certs=False)\r\n\r\n\r\n\r\n\r\n\r\ndef get_bot_response_courses(query, courses):\r\n    with open('courses.json', \"r\", encoding='utf-8') as file:\r\n        data = json.load(file)\r\n    messages = [\r\n        SystemMessage(content=f\"Тебе задают организационный вопрос: {query} по поводу всяких курсов и преподавания. \"\r\n                              f\"Дай обоснованный, подробный ответ, который удовлетворит спрашивающего, основываясь только на данные {data}\")\r\n    ]\r\n    messages.append(HumanMessage(content=query))\r\n\r\n    res = chat.invoke(messages)\r\n    messages.append(res)\r\n\r\n    return res.content\r\n\r\n\r\ndef generate_theme_user(question_answer):\r\n    questions = [q for q, a in question_answer]\r\n    answers = [a for q, a in question_answer]\r\n    messages = [\r\n        SystemMessage(content=f\"Пользователь ответил на серию вопросов: {questions}, которые проверяют его предпочитаемое направление\"\r\n                              \"передай одно из перечисленных слов: Frontend, Backend, UI/UIX designer, Dev-ops,\"\r\n                              f\"которое подходит человеку по его ответам на перчесленные вопросы: {answers} (порядок вопросов и ответов совпадает)\")\r\n    ]\r\n\r\n\r\n    res = chat.invoke(messages)\r\n    messages.append(res)\r\n\r\n    return res.content\r\n\r\ndef generate_level_user(answers, questions):\r\n    messages = [SystemMessage(content=\"Пользователь ответил на серию вопросов, которые проверяют его предположительный уровень сложности для курсов, который может пройти\"\r\n                              \"Сделай выбор между значениями: Легкий, Средний, Сложный\"\r\n                              f\"На основе данных:{questions}, {answers} (Порядок вопросов/ответов совпадает)\")]\r\n\r\n\r\n    res = chat.invoke(messages)\r\n    messages.append(res)\r\n\r\n    return res.content\r\n\r\n# print(gene(query, courses))
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sber_gigachat/utils.py b/sber_gigachat/utils.py
+--- a/sber_gigachat/utils.py	(revision 77946ff181cef2ac8676396a4f528d4caa0e3a18)
++++ b/sber_gigachat/utils.py	(date 1730008933611)
+@@ -32,7 +32,7 @@
+     messages = [
+         SystemMessage(content=f"Пользователь ответил на серию вопросов: {questions}, которые проверяют его предпочитаемое направление"
+                               "передай одно из перечисленных слов: Frontend, Backend, UI/UIX designer, Dev-ops,"
+-                              f"которое подходит человеку по его ответам на перчесленные вопросы: {answers} (порядок вопросов и ответов совпадает)")
++                              f"которое подходит человеку по его ответам: {answers} (порядок вопросов и ответов совпадает)")
+     ]
+ 
+ 
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"9319c669-8e93-4dcd-be49-6ad2f30d17a0\" name=\"Changes\" comment=\"create questions\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/bl_models/themes_bl.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/bl_models/themes_bl.py\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/config.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/config.py\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/dal_models/themes_dal.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/dal_models/themes_dal.py\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/telegram_bot/handlers.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/telegram_bot/handlers.py\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Python Script\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitHubPullRequestSearchHistory\">{\r\n  &quot;lastFilter&quot;: {\r\n    &quot;state&quot;: &quot;OPEN&quot;,\r\n    &quot;assignee&quot;: &quot;AbdullinRR&quot;\r\n  }\r\n}</component>\r\n  <component name=\"GithubPullRequestsUISettings\">{\r\n  &quot;selectedUrlAndAccountId&quot;: {\r\n    &quot;url&quot;: &quot;https://github.com/Gapenysh/Techno_Ed.git&quot;,\r\n    &quot;accountId&quot;: &quot;553dbff4-694e-4fbb-b85b-3c527105cef2&quot;\r\n  }\r\n}</component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 4\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2nyIzVMhVTtZkwmmU4v6DDpO1Ho\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\">\r\n    <OptionsSetting value=\"false\" id=\"Update\" />\r\n    <ConfirmationsSetting value=\"2\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">{\r\n  &quot;keyToString&quot;: {\r\n    &quot;Python.main.executor&quot;: &quot;Run&quot;,\r\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\r\n    &quot;git-widget-placeholder&quot;: &quot;master&quot;\r\n  }\r\n}</component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\user\\PycharmProjects\\Techno_Ed1\\telegram_bot\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"main\" type=\"PythonConfigurationType\" factoryName=\"Python\" nameIsGenerated=\"true\">\r\n      <module name=\"Telegarm_bot_hack21\" />\r\n      <option name=\"ENV_FILES\" value=\"\" />\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <envs>\r\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\r\n      </envs>\r\n      <option name=\"SDK_HOME\" value=\"\" />\r\n      <option name=\"SDK_NAME\" value=\"Python 3.12\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"false\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <option name=\"SCRIPT_NAME\" value=\"$PROJECT_DIR$/main.py\" />\r\n      <option name=\"PARAMETERS\" value=\"\" />\r\n      <option name=\"SHOW_COMMAND_LINE\" value=\"false\" />\r\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\r\n      <option name=\"MODULE_MODE\" value=\"false\" />\r\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\r\n      <option name=\"INPUT_FILE\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n  </component>\r\n  <component name=\"SharedIndexes\">\r\n    <attachedChunks>\r\n      <set>\r\n        <option value=\"bundled-python-sdk-0e3be3396995-c546a90a8094-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-242.23339.19\" />\r\n      </set>\r\n    </attachedChunks>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"9319c669-8e93-4dcd-be49-6ad2f30d17a0\" name=\"Changes\" comment=\"\" />\r\n      <created>1729939152319</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1729939152319</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"start structure\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729953282521</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729953282521</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"start structure\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729956926295</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729956926295</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"add buttons\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729958190533</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729958190533</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"add buttons\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729960045823</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729960045823</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00005\" summary=\"update\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729960123605</created>\r\n      <option name=\"number\" value=\"00005\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729960123605</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00006\" summary=\"create themes_courses\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729984942762</created>\r\n      <option name=\"number\" value=\"00006\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00006\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729984942762</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00007\" summary=\"create themes_courses\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729985447221</created>\r\n      <option name=\"number\" value=\"00007\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00007\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729985447221</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00008\" summary=\"/\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1729996994197</created>\r\n      <option name=\"number\" value=\"00008\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00008\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1729996994197</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00009\" summary=\"create questions\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1730002511874</created>\r\n      <option name=\"number\" value=\"00009\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00009\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1730002511874</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"10\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"start structure\" />\r\n    <MESSAGE value=\"add buttons\" />\r\n    <MESSAGE value=\"update\" />\r\n    <MESSAGE value=\"create themes_courses\" />\r\n    <MESSAGE value=\"/\" />\r\n    <MESSAGE value=\"create questions\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"create questions\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 77946ff181cef2ac8676396a4f528d4caa0e3a18)
++++ b/.idea/workspace.xml	(date 1730010013760)
+@@ -4,11 +4,10 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="9319c669-8e93-4dcd-be49-6ad2f30d17a0" name="Changes" comment="create questions">
++    <list default="true" id="9319c669-8e93-4dcd-be49-6ad2f30d17a0" name="Changes" comment="Улучшил промпты для GigachatAPI">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/bl_models/themes_bl.py" beforeDir="false" afterPath="$PROJECT_DIR$/bl_models/themes_bl.py" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/dal_models/themes_dal.py" beforeDir="false" afterPath="$PROJECT_DIR$/dal_models/themes_dal.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/dal_models/vacancy_dal.py" beforeDir="false" afterPath="$PROJECT_DIR$/dal_models/vacancy_dal.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/sber_gigachat/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/sber_gigachat/utils.py" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/telegram_bot/handlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/telegram_bot/handlers.py" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+@@ -72,7 +71,6 @@
+         <env name="PYTHONUNBUFFERED" value="1" />
+       </envs>
+       <option name="SDK_HOME" value="" />
+-      <option name="SDK_NAME" value="Python 3.12" />
+       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+       <option name="IS_MODULE_SDK" value="false" />
+       <option name="ADD_CONTENT_ROOTS" value="true" />
+@@ -175,7 +173,31 @@
+       <option name="project" value="LOCAL" />
+       <updated>1730002511874</updated>
+     </task>
+-    <option name="localTasksCounter" value="10" />
++    <task id="LOCAL-00010" summary="add gigachat analyse for test">
++      <option name="closed" value="true" />
++      <created>1730006504849</created>
++      <option name="number" value="00010" />
++      <option name="presentableId" value="LOCAL-00010" />
++      <option name="project" value="LOCAL" />
++      <updated>1730006504849</updated>
++    </task>
++    <task id="LOCAL-00011" summary="Улучшил промпты для GigachatAPI">
++      <option name="closed" value="true" />
++      <created>1730007207859</created>
++      <option name="number" value="00011" />
++      <option name="presentableId" value="LOCAL-00011" />
++      <option name="project" value="LOCAL" />
++      <updated>1730007207859</updated>
++    </task>
++    <task id="LOCAL-00012" summary="Улучшил промпты для GigachatAPI">
++      <option name="closed" value="true" />
++      <created>1730007800931</created>
++      <option name="number" value="00012" />
++      <option name="presentableId" value="LOCAL-00012" />
++      <option name="project" value="LOCAL" />
++      <updated>1730007800931</updated>
++    </task>
++    <option name="localTasksCounter" value="13" />
+     <servers />
+   </component>
+   <component name="Vcs.Log.Tabs.Properties">
+@@ -196,6 +218,8 @@
+     <MESSAGE value="create themes_courses" />
+     <MESSAGE value="/" />
+     <MESSAGE value="create questions" />
+-    <option name="LAST_COMMIT_MESSAGE" value="create questions" />
++    <MESSAGE value="add gigachat analyse for test" />
++    <MESSAGE value="Улучшил промпты для GigachatAPI" />
++    <option name="LAST_COMMIT_MESSAGE" value="Улучшил промпты для GigachatAPI" />
+   </component>
+ </project>
+\ No newline at end of file

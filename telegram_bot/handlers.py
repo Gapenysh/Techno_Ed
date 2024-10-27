@@ -137,6 +137,8 @@ async def get_themes(msg: Message):
 async def get_vacancies_interships(callback: CallbackQuery):
 
     data_vacancies = VacancyBL.get_vacancies()
+    data_interships = VacancyBL.get_interships()
 
 
-    await callback.message.answer("Вакансии и стажировки:", reply_markup=data_vacancies)
+    await callback.message.answer("Вакансии: ", reply_markup=data_vacancies)
+    await callback.message.answer("Стажировки: ", reply_markup=data_interships)

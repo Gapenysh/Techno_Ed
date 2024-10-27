@@ -4,8 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9319c669-8e93-4dcd-be49-6ad2f30d17a0" name="Changes" comment="add README.md">
-      <change beforePath="$PROJECT_DIR$/db_connection.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_connection.py" afterDir="false" />
+    <list default="true" id="9319c669-8e93-4dcd-be49-6ad2f30d17a0" name="Changes" comment="Add some info sbout config to README.md">
+      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bl_models/.еnv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bl_models/vacancy_bl.py" beforeDir="false" afterPath="$PROJECT_DIR$/bl_models/vacancy_bl.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/telegram_bot/handlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/telegram_bot/handlers.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -186,7 +190,47 @@
       <option name="project" value="LOCAL" />
       <updated>1730018120789</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="add requirements.txt">
+      <option name="closed" value="true" />
+      <created>1730018241718</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1730018241718</updated>
+    </task>
+    <task id="LOCAL-00013" summary="add python version">
+      <option name="closed" value="true" />
+      <created>1730018614196</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1730018614196</updated>
+    </task>
+    <task id="LOCAL-00014" summary="create.env for config">
+      <option name="closed" value="true" />
+      <created>1730020028294</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1730020028294</updated>
+    </task>
+    <task id="LOCAL-00015" summary="remove config info to .env">
+      <option name="closed" value="true" />
+      <created>1730020681247</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1730020681247</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Add some info sbout config to README.md">
+      <option name="closed" value="true" />
+      <created>1730020934918</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1730020934918</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -209,6 +253,11 @@
     <MESSAGE value="create questions" />
     <MESSAGE value="add methods" />
     <MESSAGE value="add README.md" />
-    <option name="LAST_COMMIT_MESSAGE" value="add README.md" />
+    <MESSAGE value="add requirements.txt" />
+    <MESSAGE value="add python version" />
+    <MESSAGE value="create.env for config" />
+    <MESSAGE value="remove config info to .env" />
+    <MESSAGE value="Add some info sbout config to README.md" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add some info sbout config to README.md" />
   </component>
 </project>

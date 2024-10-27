@@ -8,3 +8,9 @@ class VacancyBL:
         if not result:
             return None
         return result
+    @staticmethod
+    def get_interships():
+        result = VacansyDAL.get_intership()
+        if not result:
+            return None
+        return result
